@@ -1,5 +1,7 @@
 import { Component, } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { User } from './Models/user';
+import { AccountService } from './Services/account.service';
 
 
 @Component({
@@ -12,20 +14,16 @@ export class AppComponent {
   users: any;
 
 
-  constructor(private http: HttpClient){}
+  constructor(
+    private accountService: AccountService,
+  ) { }
 
-  ngOnInit(){
-    this.GetUser();
+  ngOnInit() {
+    this.setCurrentUser();
   }
 
-  GetUser = () =>{
-    this.http.get('http://localhost:50569/api/Users').subscribe((feedback) =>{
-      console.log("FeedBack", feedback);
-      this.users = feedback;
-    },
-    err => {
-      console.log("Error", err);
-    }
-    )
+  setCurrentUser() {
+    const user: User = JSON.parse(localStorage.getItem('user'));
+    this.accountService.setCurrentUser(user);
   }
 }
