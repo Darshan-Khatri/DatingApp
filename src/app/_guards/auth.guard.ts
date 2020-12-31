@@ -13,9 +13,12 @@ export class AuthGuard implements CanActivate {
 
   constructor(private accountService: AccountService, private toastr: ToastrService,){}
 
+  //Here it checks whether any user is currently logged in or not. i.e whether our replySubject has any user inside its buffer.
+  //If yes then it returns true else false. We are applying this CanActivate guard in our routing module.
   canActivate(): Observable<boolean>{
     return this.accountService.currentUser$.pipe(
       map(user => {
+        // console.log("User login", user);
         if (user) {
           return true;
         }
