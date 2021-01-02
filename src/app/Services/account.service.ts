@@ -22,8 +22,7 @@ export class AccountService {
       map((feedback: User) => {
         const user = feedback;
         if (user) {
-          localStorage.setItem('user', JSON.stringify(user));
-          this.currentUserSource.next(user);
+          this.setCurrentUser(user);
         }
       })
     )
@@ -36,8 +35,7 @@ export class AccountService {
       //It also stores are registered user in currentUserSource.
       map((user: User) => {
         if (user) {
-          localStorage.setItem('user', JSON.stringify(user));
-          this.currentUserSource.next(user);
+          this.setCurrentUser(user);
         }
         //This return is Map method return, Not of the register service.
         return user;
@@ -46,6 +44,7 @@ export class AccountService {
   }
 
   setCurrentUser(user: User) {
+    localStorage.setItem('user', JSON.stringify(user));
     this.currentUserSource.next(user);
   }
 

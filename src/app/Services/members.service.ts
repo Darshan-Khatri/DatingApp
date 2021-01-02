@@ -17,7 +17,8 @@ export class MembersService {
 
   constructor(private http: HttpClient) { }
 
-  //Here we need to pass token in http header and this is taken care by our jwtInterceptor, what it does is for every http request after user logged-in it will add token to that http request.
+  //Here we need to pass token in http header and this is taken care by our jwtInterceptor,
+  //what it does is for every http request after user logged-in it will add token to that http request.
   getMembers() {
     if (this.members.length > 0) {
       return of(this.members);
@@ -43,5 +44,13 @@ export class MembersService {
         this.members[index] = member;
       })
     );
+  }
+
+  setMainPhoto(photoId: number){
+    return this.http.put(this.baseUrl + 'users/set-main-photo/' + photoId,{});
+  }
+
+  deletePhoto(photoId: number){
+    return this.http.delete(this.baseUrl + 'users/delete-photo/' + photoId);
   }
 }
