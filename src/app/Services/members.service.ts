@@ -40,7 +40,7 @@ export class MembersService {
     this.userParams = params;
   }
 
-  resetUserParams(){
+  resetUserParams() {
     this.userParams = new UserParams(this.user);
     return this.userParams;
   }
@@ -74,6 +74,7 @@ export class MembersService {
 
     const paginatedResult: PaginatedResult<T> = new PaginatedResult<T>();
 
+    //This goes to url header
     return this.http.get<T>(url, { observe: 'response', params }).pipe(
 
       /*Map response is the response from server => and response from server is divided here into 2 parts.
@@ -130,5 +131,16 @@ export class MembersService {
 
   deletePhoto(photoId: number) {
     return this.http.delete(this.baseUrl + 'users/delete-photo/' + photoId);
+  }
+
+  /********METHODS FOR LIKES************************************ */
+  addLike(username: string) {
+    return this.http.post(this.baseUrl + 'likes/' + username, {});
+  }
+
+  getLikes(predicate: string, pageNumber: number, pageSize: number) {
+    let params = this.getPaginationHeader(pageNumber, pageSize);
+    params = params.append('predicate', predicate);
+    return this.getPaginatedResult<Partial<Member[]>>(this.baseUrl + 'likes', params);
   }
 }
