@@ -1,8 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NgxGalleryAnimation, NgxGalleryImage, NgxGalleryOptions } from '@kolkov/ngx-gallery';
+import { TabDirective, TabsetComponent } from 'ngx-bootstrap/tabs';
 import { Member } from 'src/app/Models/member';
+import { Message } from 'src/app/Models/message';
 import { MembersService } from 'src/app/Services/members.service';
+import { MessageService } from 'src/app/Services/message.service';
 
 @Component({
   selector: 'app-member-detail',
@@ -11,17 +14,42 @@ import { MembersService } from 'src/app/Services/members.service';
 })
 export class MemberDetailComponent implements OnInit {
 
+  @ViewChild('memberTabs' , {static: true}) memberTabs: TabsetComponent;
   member: Member;
   galleryOptions: NgxGalleryOptions[];
   galleryImages: NgxGalleryImage[];
 
+  //for each tab in html we have tabDirectives
+  activeTab: TabDirective;
+
+  messages: Message[] = [];
+
   constructor(
     private memberService: MembersService,
     private route: ActivatedRoute,
+    private messageService: MessageService,
   ) { }
 
   ngOnInit(): void {
-    this.loadMember();
+
+    //What it does is, It goes to our routeResolver and gets the all required data from their
+
+    /*When someone navigates to this page,
+      1- Checks routing in app-routing-module
+      2- It finds that its an authorized method so it will look for token in request header
+      3- Then finds the routeResolver if it has routerResolver file then it goes to that file(member-detailed-resolver)
+      4- From resolver file it load the required data for navigation page before we navigate to page
+      5- When resolver gets the required data from server then it allows angular to navigate to page and in navigatePage component's ngOnIt we subscribe to resolver and gets all data immediately
+    */
+    this.route.data.subscribe(data => {
+      this.member = data.member;
+    })
+    // this.loadMember();
+
+    //We have used Tab as key of queryParams in member-card to navigate to message tab when user clicks on messageIcon in home page.
+    this.route.queryParams.subscribe(params => {
+      params.tab ? this.selectTab(params.tab) : this.selectTab(0);
+    })
 
     this.galleryOptions = [
       {
@@ -33,14 +61,15 @@ export class MemberDetailComponent implements OnInit {
         preview: false
       }
     ]
+    this.galleryImages = this.getImages();
   }
 
 
-  getImages(): NgxGalleryImage[]{
+  getImages(): NgxGalleryImage[] {
     const imageUrls = [];
-    for(const  photo of this.member.photos){
+    for (const photo of this.member.photos) {
       imageUrls.push({
-        small:photo?.url,
+        small: photo?.url,
         medium: photo?.url,
         big: photo?.url
       })
@@ -48,11 +77,22 @@ export class MemberDetailComponent implements OnInit {
     return imageUrls;
   }
 
-  loadMember(){
-    this.memberService.getMember(this.route.snapshot.paramMap.get('username')).subscribe(feedback =>{
-      this.member = feedback;
-      console.log(this.member);
-      this.galleryImages = this.getImages();
-    });
+
+  loadMessages() {
+    this.messageService.getMessageThread(this.member.username).subscribe(fb => {
+      this.messages = fb;
+      console.log("Messages", this.messages);
+    })
+  }
+
+  selectTab(tabId:number){
+    this.memberTabs.tabs[tabId].active = true;
+  }
+
+  onTabActivated(data: TabDirective) {
+    this.activeTab = data;
+    if (this.activeTab.heading === 'Messages' && this.messages.length === 0) {
+      this.loadMessages();
+    }
   }
 }
