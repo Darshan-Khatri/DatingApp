@@ -17,4 +17,4 @@ export class MemberDetailedResolver implements Resolve<Member> {
   }
 
 }
-/*With route resolver you can get required data become you construct your template and component */
+/*With route resolver you can get required data before you construct your template and component */

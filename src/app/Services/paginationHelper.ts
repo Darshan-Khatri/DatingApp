@@ -8,6 +8,7 @@ export function getPaginatedResult<T>(url, params, http:HttpClient) {
   const paginatedResult: PaginatedResult<T> = new PaginatedResult<T>();
 
   //This goes to url header
+  /* Sometimes servers return special headers or status codes with body to indicate certain conditions that are important to the application workflow. Tell HttpClient that you want the full response with the observe option of the get() method:*/
   return http.get<T>(url, { observe: 'response', params }).pipe(
 
     /*Map response is the response from server => and response from server is divided here into 2 parts.
@@ -26,6 +27,8 @@ export function getPaginatedResult<T>(url, params, http:HttpClient) {
 }
 
 export function getPaginationHeader(pageNumber: number, pageSize: number) {
+
+  //Because of HttpParams we are able to put parameters in URL.
   let params = new HttpParams();
 
   params = params.append('pageNumber', pageNumber.toString());

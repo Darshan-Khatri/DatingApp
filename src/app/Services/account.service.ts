@@ -44,6 +44,9 @@ export class AccountService {
   }
 
   setCurrentUser(user: User) {
+    user.roles = [];
+    const userRoles = this.getDecodedToken(user.token).role;
+    Array.isArray(userRoles) ? user.roles = userRoles : user.roles.push(userRoles);
     localStorage.setItem('user', JSON.stringify(user));
     this.currentUserSource.next(user);
   }
@@ -51,5 +54,14 @@ export class AccountService {
   logout() {
     localStorage.removeItem('user');
     this.currentUserSource.next(null);
+  }
+
+  /**
+   * "atob" is method which would decode are token the middle part which is payload part and from their we will get
+   * user roles.
+   *
+   */
+  getDecodedToken(token){
+     return JSON.parse(atob(token.split('.')[1]));
   }
 }

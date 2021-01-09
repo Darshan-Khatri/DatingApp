@@ -44,7 +44,6 @@ export class MemberDetailComponent implements OnInit {
     this.route.data.subscribe(data => {
       this.member = data.member;
     })
-    // this.loadMember();
 
     //We have used Tab as key of queryParams in member-card to navigate to message tab when user clicks on messageIcon in home page.
     this.route.queryParams.subscribe(params => {
