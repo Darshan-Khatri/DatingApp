@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { ConsoleLogger } from '@microsoft/signalr/dist/esm/Utils';
 import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { User } from '../Models/user';
 
@@ -16,7 +18,7 @@ export class PresenceService {
   private onlineUsersSource = new BehaviorSubject<string[]>([]);
   onlineUsers$ = this.onlineUsersSource.asObservable();
 
-  constructor(private toastr: ToastrService) { }
+  constructor(private toastr: ToastrService, private router: Router) { }
 
   /*Now we are creating a method to create hub connection, So when user does connect to our application
   and they are authenticated then we gonna a automatically create the hub connection, that gonna connect them to our
@@ -40,15 +42,26 @@ export class PresenceService {
 
       //This is event that we used server side in presenceHub class.
       this.hubConnection.on('UserIsOnline', username => {
-        this.toastr.info(username + ' has connected');
+        this.onlineUsers$.pipe(take(1)).subscribe(usernames => {
+          this.onlineUsersSource.next([...usernames, username]);
+        })
       })
 
       this.hubConnection.on('UserIsOffline', username => {
-        this.toastr.warning(username + ' is disconnected');
+        this.onlineUsers$.pipe(take(1)).subscribe(usernames => {
+          this.onlineUsersSource.next([...usernames.filter(x => x !== username)]);
+        })
       })
 
       this.hubConnection.on('GetOnlineUsers', (username: string[]) => {
         this.onlineUsersSource.next(username);
+      })
+
+      this.hubConnection.on('NewMessageReceived', ({username, knownAs}) => {
+        this.toastr.info(knownAs + ' has send you a new message!')
+          .onTap
+          .pipe(take(1))
+          .subscribe(() => this.router.navigateByUrl('/members/' + username + '?tab=3'));
       })
   }
 
